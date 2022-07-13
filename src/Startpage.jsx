@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useChat } from './ChatContext'
 import styled, { ThemeProvider } from 'styled-components'
 import { darkTheme, GlobalStyle, lightTheme } from './style'
+import { BallTriangle } from 'react-loader-spinner'
 import { nanoid } from 'nanoid'
 const storedId = localStorage.getItem('storedId') || nanoid(12)
 import io from 'socket.io-client'
@@ -47,7 +48,10 @@ const JoinButton = styled.button`
   border-radius: 0.5rem;
   color: white;
   cursor: pointer;
+  display: flex;
+  gap: 0.25rem;
   height: 2.5rem;
+  justify-content: center;
   padding: 0.75rem;
   width: 16rem;
   :hover {
@@ -63,7 +67,7 @@ export default function Startpage() {
   const [theme, setTheme] = useState(getTheme())
 
   const nameRef = useRef(name)
-  const [isReady, setIsReady] = useState(false)
+  const [isReady, setIsReady] = useState(null)
 
   function getTheme() {
     const storedTheme = localStorage.getItem('theme')
@@ -73,6 +77,8 @@ export default function Startpage() {
   }
   async function joinChat(e) {
     e.preventDefault()
+    if (isReady === false) return
+    setIsReady(false)
     localStorage.setItem('name', name)
     localStorage.setItem('channel', channel)
     socket.emit('check_if_exists', channel)
@@ -113,7 +119,7 @@ export default function Startpage() {
               <BeforeInput content='Channel'>
                 <CustomInput defaultValue={channel} onChange={(e) => setChannel(e.target.value)} placeholder='Channel you want to join...' required type='text' />
               </BeforeInput>
-              <JoinButton type='submit'>Start Chatting</JoinButton>
+              <JoinButton type='submit'>Start Chatting{isReady === false ? <BallTriangle ariaLabel='(Wait...)' color='white' height='15' width='15' /> : null}</JoinButton>
             </Form>
           </StartpageDiv> :
           <YourChat setTheme={setTheme} socket={socket} storedId={storedId} theme={theme} />
